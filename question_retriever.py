@@ -58,7 +58,6 @@ def ask_question(question):
     return rag_chain.invoke(question)
 
 
-# Add argparse code here
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ask a question.")
     parser.add_argument("question", type=str, help="The question to ask.")
