@@ -4,13 +4,11 @@ import os
 import argparse
 
 from langchain_community.document_loaders import TextLoader, ToMarkdownLoader
-from langchain import hub
 from langchain_chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from langchain_openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 
 
@@ -62,5 +60,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ask a question.")
     parser.add_argument("question", type=str, help="The question to ask.")
     args = parser.parse_args()
+
     print(ask_question(args.question))
+
     vectorstore.delete_collection()
