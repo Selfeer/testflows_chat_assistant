@@ -29,10 +29,12 @@ def load_data_from_file(file_path):
 
 
 def format_docs(docs):
+    """Format the documents for the RAG chain."""
     return "\n\n".join(doc.page_content for doc in docs)
 
 
 def ask_question(question):
+    """Ask a question about TestFlows and get an answer."""
     key = os.environ["OPENAI_API_KEY"]
 
     llm = ChatOpenAI(model="gpt-4-turbo", api_key=key)
