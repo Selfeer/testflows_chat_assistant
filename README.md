@@ -1,6 +1,6 @@
-# Project Title
+# TesttFlows Chat Assistant
 
-This project is a Python-based application that uses OpenAI's GPT-4 model to answer questions based on a given context. It loads data from a file, formats it, and uses it as a context to answer the provided question. The project uses several libraries including `langchain_chroma`, `langchain_community`, `langchain_core`, `langchain_openai`, and `langchain_text_splitters`.
+This project is a Python-based application that uses OpenAI's GPT-4 model to answer questions based on [documentation from TestFlows](https://testflows.com/handbook/). It loads data from a file, formats it, and uses it as a context to answer the provided question. The project uses several libraries including `langchain_chroma`, `langchain_community`, `langchain_core`, `langchain_openai`, and `langchain_text_splitters`.
 
 ## Getting Started
 
