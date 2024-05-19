@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import getpass
 import os
 
 from langchain_chroma import Chroma
@@ -10,49 +11,52 @@ from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from template import template
 
-template = """Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-Use three sentences maximum and keep the answer as concise as possible. When you provide an answer, also provide a code example if possible.
-Always say "thanks for asking!" at the end of the answer.
 
-{context}
+def set_openai_api_key():
+    """Set the OpenAI API key as an environment variable if not already set."""
+    if "OPENAI_API_KEY" not in os.environ:
+        os.environ["OPENAI_API_KEY"] = getpass.getpass(prompt="Enter OpenAI API key: ")
 
-Question: {question}
 
-Helpful Answer:"""
+def load_data_from_file(file_path):
+    """Load data from a file into a document object."""
+    loader = TextLoader(file_path)
 
-key = os.environ["OPENAI_API_KEY"]
-
-llm = ChatOpenAI(model="gpt-3.5-turbo-0125", api_key=key)
-
-loader = TextLoader("./index.md")
-docs = loader.load()
-
-prompt = PromptTemplate.from_template(template)
-
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-splits = text_splitter.split_documents(docs)
-
-vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())
-
-retriever = vectorstore.as_retriever()
+    return loader.load()
 
 
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
-    | prompt
-    | llm
-    | StrOutputParser()
-)
-
-
 def ask_question(question):
-    return rag_chain.invoke(question)
+    key = os.environ["OPENAI_API_KEY"]
+
+    llm = ChatOpenAI(model="gpt-4-turbo", api_key=key)
+
+    docs = load_data_from_file("./index.md")
+
+    prompt = PromptTemplate.from_template(template)
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = text_splitter.split_documents(docs)
+
+    vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())
+
+    retriever = vectorstore.as_retriever()
+
+    rag_chain = (
+        {"context": retriever | format_docs, "question": RunnablePassthrough()}
+        | prompt
+        | llm
+        | StrOutputParser()
+    )
+
+    print(rag_chain.invoke(question))
+
+    vectorstore.delete_collection()
 
 
 if __name__ == "__main__":
@@ -60,6 +64,6 @@ if __name__ == "__main__":
     parser.add_argument("question", type=str, help="The question to ask.")
     args = parser.parse_args()
 
-    print(ask_question(args.question))
+    set_openai_api_key()
 
-    vectorstore.delete_collection()
+    ask_question(args.question)
