@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import getpass
-import os
 
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import TextLoader
@@ -13,12 +11,6 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from template import template
-
-
-def set_openai_api_key():
-    """Set the OpenAI API key as an environment variable if not already set."""
-    if "OPENAI_API_KEY" not in os.environ:
-        os.environ["OPENAI_API_KEY"] = getpass.getpass(prompt="Enter OpenAI API key: ")
 
 
 def load_data_from_file(file_path):
@@ -33,11 +25,12 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 
-def ask_question(question):
-    """Ask a question about TestFlows and get an answer."""
-    key = os.environ["OPENAI_API_KEY"]
+def set_up_chain(key, model=None):
+    """Set up the RAG chain."""
+    if model is None:
+        model = "gpt-4-turbo"
 
-    llm = ChatOpenAI(model="gpt-4-turbo", api_key=key)
+    llm = ChatOpenAI(model=model, api_key=key)
 
     docs = load_data_from_file("./index.md")
 
@@ -46,7 +39,9 @@ def ask_question(question):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splits = text_splitter.split_documents(docs)
 
-    vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings())
+    vectorstore = Chroma.from_documents(
+        documents=splits, embedding=OpenAIEmbeddings(openai_api_key=key)
+    )
 
     retriever = vectorstore.as_retriever()
 
@@ -57,16 +52,28 @@ def ask_question(question):
         | StrOutputParser()
     )
 
-    print(rag_chain.invoke(question))
-
-    vectorstore.delete_collection()
+    return rag_chain, vectorstore
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Ask a question.")
-    parser.add_argument("question", type=str, help="The question to ask.")
+    parser = argparse.ArgumentParser(description="Set up the RAG chain.")
+    parser.add_argument("--key", type=str, required=True, help="OpenAI API key.")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="gpt-4-turbo",
+        help="OpenAI LLM model to use for the RAG chain.",
+    )
     args = parser.parse_args()
 
-    set_openai_api_key()
+    rag_chain, vectorstore = set_up_chain(key=args.key, model=args.model)
 
-    ask_question(args.question)
+    while True:
+        question = input("Ask a question: ")
+
+        if question == "exit":
+            break
+
+        print(rag_chain.invoke(question))
+
+    vectorstore.delete_collection()
