@@ -55,6 +55,17 @@ def set_up_chain(key, model=None):
     return rag_chain, vectorstore
 
 
+def ask_a_question():
+    """Ask a question to the RAG chain."""
+    while True:
+        question = input("Ask a question: ")
+
+        if question == "exit":
+            break
+
+        print(rag_chain.invoke(question))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Set up the RAG chain.")
     parser.add_argument("--key", type=str, required=True, help="OpenAI API key.")
@@ -68,12 +79,6 @@ if __name__ == "__main__":
 
     rag_chain, vectorstore = set_up_chain(key=args.key, model=args.model)
 
-    while True:
-        question = input("Ask a question: ")
-
-        if question == "exit":
-            break
-
-        print(rag_chain.invoke(question))
+    ask_a_question()
 
     vectorstore.delete_collection()
