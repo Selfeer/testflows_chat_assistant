@@ -28,7 +28,7 @@ The main script of the project is `question_retriever.py`. It takes a question a
 Here is an example of how to use the script:
 
 ```bash
-python question_retriever.py "Your question here"
+python question_retriever.py --key YOUR_OPENAI_API_KEY --model MODEL_NAME
 ```
 
 ## Built With
