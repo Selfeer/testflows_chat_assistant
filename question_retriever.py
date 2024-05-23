@@ -55,7 +55,7 @@ def set_up_chain(key, model=None):
     return rag_chain, vectorstore
 
 
-def ask_a_question():
+def ask_a_question(chain):
     """Ask a question to the RAG chain."""
     while True:
         question = input("Ask a question: ")
@@ -63,7 +63,7 @@ def ask_a_question():
         if question == "exit":
             break
 
-        print(rag_chain.invoke(question))
+        print(chain.invoke(question))
 
 
 if __name__ == "__main__":
@@ -79,6 +79,6 @@ if __name__ == "__main__":
 
     rag_chain, vectorstore = set_up_chain(key=args.key, model=args.model)
 
-    ask_a_question()
+    ask_a_question(chain=rag_chain)
 
     vectorstore.delete_collection()
