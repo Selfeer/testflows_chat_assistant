@@ -96,6 +96,7 @@ def question_2(self, key):
 
 
 @TestFeature
+@Name("answer consistency")
 def feature(self):
     key = Secret("key")(os.environ["OPENAI_API_KEY"])
 

@@ -31,6 +31,19 @@ Here is an example of how to use the script:
 python question_retriever.py --key YOUR_OPENAI_API_KEY --model MODEL_NAME
 ```
 
+##
+
+The tests are located inside the `tests` directory. You need to set the `OPENAI_API_KEY` environment variable before running the tests. You can run the tests using the following command:
+
+
+```bash
+export OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+```
+
+```bash
+python3 answer_consistency.py
+```
+
 ## Built With
 
 - Python
