@@ -1,12 +1,12 @@
 import os
-import sys
 import subprocess
+import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from openai import OpenAI
 
 from testflows.core import *
-from openai import OpenAI
 from tests.correct_answers import *
 
 
@@ -66,6 +66,7 @@ def compare_answers(self, key, expected, actual):
 
 @TestOutline
 def validate_answer(self, key, question_answer):
+    """Validate the answer to a question."""
     with Given("I ask a question and retrieve an answer"):
         actual_answer = retrieve_an_answer(
             key=key,
