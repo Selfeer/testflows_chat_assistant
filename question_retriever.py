@@ -3,7 +3,7 @@
 import argparse
 
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
@@ -13,9 +13,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from template import template
 
 
-def load_data_from_file(file_path):
+def load_data_from_file():
     """Load data from a file into a document object."""
-    loader = TextLoader(file_path)
+    loader = WebBaseLoader(
+        "https://raw.githubusercontent.com/testflows/TestFlows-WebSite/master/source/handbook/index.md"
+    )
 
     return loader.load()
 
@@ -32,7 +34,7 @@ def set_up_chain(key, model=None):
 
     llm = ChatOpenAI(model=model, api_key=key)
 
-    docs = load_data_from_file("./index.md")
+    docs = load_data_from_file()
 
     prompt = PromptTemplate.from_template(template)
 
