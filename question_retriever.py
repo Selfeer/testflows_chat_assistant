@@ -13,7 +13,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from template import template
 
 
-def load_data_from_file():
+def load_data_from_document():
     """Load data from a file into a document object."""
     loader = WebBaseLoader(
         "https://raw.githubusercontent.com/testflows/TestFlows-WebSite/master/source/handbook/index.md"
@@ -34,7 +34,7 @@ def set_up_chain(key, model=None):
 
     llm = ChatOpenAI(model=model, api_key=key)
 
-    docs = load_data_from_file()
+    docs = load_data_from_document()
 
     prompt = PromptTemplate.from_template(template)
 
