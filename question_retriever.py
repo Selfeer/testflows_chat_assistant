@@ -6,7 +6,7 @@ from langchain_chroma import Chroma
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -48,13 +48,17 @@ def set_up_chain(key, model=None):
     retriever = vectorstore.as_retriever()
 
     rag_chain = (
-        {"context": retriever | format_docs, "question": RunnablePassthrough()}
-        | prompt
-        | llm
-        | StrOutputParser()
+            RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
+            | prompt
+            | llm
+            | StrOutputParser()
     )
 
-    return rag_chain, vectorstore
+    rag_chain_with_source = RunnableParallel(
+        {"context": retriever, "question": RunnablePassthrough()}
+    ).assign(answer=rag_chain)
+
+    return rag_chain_with_source, vectorstore
 
 
 def ask_a_question(chain):
@@ -64,8 +68,22 @@ def ask_a_question(chain):
 
         if question == "exit":
             break
+        output = {}
+        curr_key = None
+        for chunk in chain.stream(question):
+            for key in chunk:
+                if key == "context":
+                    continue
+                if key not in output:
+                    output[key] = chunk[key]
+                else:
+                    output[key] += chunk[key]
+                if key != curr_key:
+                    print(f"\n\n{key}: {chunk[key]}", end="", flush=True)
+                else:
+                    print(chunk[key], end="", flush=True)
+                curr_key = key
 
-        print(chain.invoke(question))
 
 
 if __name__ == "__main__":
