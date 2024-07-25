@@ -83,6 +83,7 @@ def ask_a_question(chain):
                 else:
                     print(chunk[key], end="", flush=True)
                 curr_key = key
+        print("\n")
 
 
 if __name__ == "__main__":
