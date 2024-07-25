@@ -48,10 +48,10 @@ def set_up_chain(key, model=None):
     retriever = vectorstore.as_retriever()
 
     rag_chain = (
-            RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
-            | prompt
-            | llm
-            | StrOutputParser()
+        RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
+        | prompt
+        | llm
+        | StrOutputParser()
     )
 
     rag_chain_with_source = RunnableParallel(
@@ -83,7 +83,6 @@ def ask_a_question(chain):
                 else:
                     print(chunk[key], end="", flush=True)
                 curr_key = key
-
 
 
 if __name__ == "__main__":
